@@ -20,7 +20,7 @@ const packageTemplateString = `<!DOCTYPE html>
 	<head>
 		<meta charset="utf-8">
 		<title>{{.Repo.Name}}.{{.Repo.MajorVersion}}{{.Repo.SubPath}} - {{.Repo.GopkgPath}}</title>
-		<link href='//fonts.googleapis.com/css?family=Ubuntu+Mono|Ubuntu' rel='stylesheet' >
+		<link href='//fonts.googleapis.com/css?family=Open+Sans|Ubuntu+Mono:300,400,700' rel='stylesheet' >
 		<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" >
 		<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" >
 		<style>
@@ -36,7 +36,7 @@ const packageTemplateString = `<!DOCTYPE html>
 			}
 
 			body {
-				font-family: 'Ubuntu', sans-serif;
+				font-family: 'Open Sans', sans-serif;
 			}
 
 			pre {
@@ -62,7 +62,7 @@ const packageTemplateString = `<!DOCTYPE html>
 			}
 
 			.getting-started pre {
-				font-size: 15px;
+				font-size: 16px;
 			}
 
 			.versions {
@@ -70,6 +70,7 @@ const packageTemplateString = `<!DOCTYPE html>
 			}
 			.versions div {
 				padding-top: 5px;
+				padding-left: 5px;
 			}
 			.versions a {
 				font-weight: bold;
@@ -109,7 +110,7 @@ const packageTemplateString = `<!DOCTYPE html>
 	</head>
 	<body>
 		<script type="text/javascript">
-			// If there's a URL fragment, assume it's an attempt to read a specific documentation entry. 
+			// If there's a URL fragment, assume it's an attempt to read a specific documentation entry.
 			if (window.location.hash.length > 1) {
 				window.location = "http://godoc.org/{{.Repo.GopkgPath}}" + window.location.hash;
 			}
@@ -141,15 +142,15 @@ const packageTemplateString = `<!DOCTYPE html>
 							<h2>Getting started</h2>
 							<div>
 								<p>To get the package, execute:</p>
-								<pre>go get {{.Repo.GopkgPath}}</pre>
+								<pre>go get -u {{.Repo.GopkgPath}}</pre>
 							</div>
 							<div>
 								<p>To import this package, add the following line to your code:</p>
 								<pre>import "{{.Repo.GopkgPath}}"</pre>
-								{{if .PackageName}}<p>Refer to it as <i>{{.PackageName}}</i>.{{end}}
+								{{if .PackageName}}<p>Refer to it as <strong><i>{{.PackageName}}</i></strong>.{{end}}
 							</div>
 							<div>
-								<p>For more details, see the API documentation.</p>
+								<p>For more details, go to <a href="https://docs.aahframework.org">https://docs.aahframework.org</a>.</p>
 							</div>
 						</div>
 					</div>

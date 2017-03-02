@@ -20,11 +20,12 @@ import (
 )
 
 var (
-	httpFlag  = flag.String("http", ":8080", "Serve HTTP at given address")
-	httpsFlag = flag.String("https", "", "Serve HTTPS at given address")
-	certFlag  = flag.String("cert", "", "Use the provided TLS certificate")
-	keyFlag   = flag.String("key", "", "Use the provided TLS key")
-	acmeFlag  = flag.String("acme", "", "Auto-request TLS certs and store in given directory")
+	httpFlag       = flag.String("http", ":8080", "Serve HTTP at given address")
+	httpsFlag      = flag.String("https", "", "Serve HTTPS at given address")
+	certFlag       = flag.String("cert", "", "Use the provided TLS certificate")
+	keyFlag        = flag.String("key", "", "Use the provided TLS key")
+	acmeFlag       = flag.String("acme", "", "Auto-request TLS certs and store in given directory")
+	domainNameFlag = flag.String("domainName", "http://labix.org/gopkg.in", "Provide custom domain name")
 )
 
 var httpServer = &http.Server{
@@ -120,11 +121,12 @@ go get {{.GopkgPath}}
 
 // Repo represents a source code repository on GitHub.
 type Repo struct {
-	User         string
-	Name         string
-	SubPath      string
-	OldFormat    bool // The old /v2/pkg format.
-	MajorVersion Version
+	User             string
+	Name             string
+	SubPath          string
+	OldFormat        bool // The old /v2/pkg format.
+	MajorVersion     Version
+	IsCustomAssigned bool
 
 	// FullVersion is the best version in AllVersions that matches MajorVersion.
 	// It defaults to InvalidVersion if there are no matches.
@@ -149,11 +151,13 @@ func (repo *Repo) SetVersions(all []Version) {
 
 // GitHubRoot returns the repository root at GitHub, without a schema.
 func (repo *Repo) GitHubRoot() string {
-	if repo.User == "" {
+	if repo.User == "" && repo.Name == "aah" {
 		return "github.com/go-" + repo.Name + "/" + repo.Name
-	} else {
-		return "github.com/" + repo.User + "/" + repo.Name
+	} else if repo.User == "" && repo.Name != "aah" {
+		repo.User = "go-aah"
+		repo.IsCustomAssigned = true
 	}
+	return "github.com/" + repo.User + "/" + repo.Name
 }
 
 // GitHubTree returns the repository tree name at GitHub for the selected version.
@@ -181,16 +185,16 @@ func (repo *Repo) GopkgVersionRoot(version Version) string {
 	version.Patch = -1
 	v := version.String()
 	if repo.OldFormat {
-		if repo.User == "" {
-			return "gopkg.in/" + v + "/" + repo.Name
+		if repo.User == "" || repo.IsCustomAssigned {
+			return *domainNameFlag + "/" + v + "/" + repo.Name
 		} else {
-			return "gopkg.in/" + repo.User + "/" + v + "/" + repo.Name
+			return *domainNameFlag + "/" + repo.User + "/" + v + "/" + repo.Name
 		}
 	} else {
-		if repo.User == "" {
-			return "gopkg.in/" + repo.Name + "." + v
+		if repo.User == "" || repo.IsCustomAssigned {
+			return *domainNameFlag + "/" + repo.Name + "." + v
 		} else {
-			return "gopkg.in/" + repo.User + "/" + repo.Name + "." + v
+			return *domainNameFlag + "/" + repo.User + "/" + repo.Name + "." + v
 		}
 	}
 }
@@ -207,7 +211,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("%s requested %s", req.RemoteAddr, req.URL)
 
 	if req.URL.Path == "/" {
-		resp.Header().Set("Location", "http://labix.org/gopkg.in")
+		resp.Header().Set("Location", "https://"+*domainNameFlag)
 		resp.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
@@ -217,7 +221,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	if m == nil {
 		m = patternOld.FindStringSubmatch(req.URL.Path)
 		if m == nil {
-			sendNotFound(resp, "Unsupported URL pattern; see the documentation at gopkg.in for details.")
+			sendNotFound(resp, fmt.Sprintf("Unsupported URL pattern; see the documentation at %s for details.", *domainNameFlag))
 			return
 		}
 		// "/v2/name" <= "/name.v2"
