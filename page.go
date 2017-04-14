@@ -43,6 +43,12 @@ const packageTemplateString = `<!DOCTYPE html>
 				font-family: 'Ubuntu Mono', sans-serif;
 			}
 
+			.aah-button {
+				color: #fff;
+				background-color: #e25657;
+				border-color: #e25657;
+			}
+
 			.main {
 				padding-top: 20px;
 			}
@@ -122,6 +128,9 @@ const packageTemplateString = `<!DOCTYPE html>
 						<div class="page-header">
 							<h1>{{.Repo.GopkgPath}}</h1>
 							{{.Synopsis}}
+							<!-- <div class="pull-right" style="margin-top:-50px;">
+								<a href="https://aahframework.org"><img src="https://aahframework.org/assets/img/aah-logo-64x64.png" alt="aah framework logo"/></a>
+							</div> -->
 						</div>
 					</div>
 				</div>
@@ -132,8 +141,8 @@ const packageTemplateString = `<!DOCTYPE html>
 				{{ end }}
 				<div class="row" >
 					<div class="col-sm-12" >
-						<a class="btn btn-lg btn-info" href="https://{{.Repo.GitHubRoot}}/tree/{{.Repo.GitHubTree}}{{.Repo.SubPath}}" ><i class="fa fa-github"></i> Source Code</a>
-						<a class="btn btn-lg btn-info" href="http://godoc.org/{{.Repo.GopkgPath}}" ><i class="fa fa-info-circle"></i> API Documentation</a>
+						<a class="btn btn-lg aah-button" href="https://{{.Repo.GitHubRoot}}/tree/{{.Repo.GitHubTree}}{{.Repo.SubPath}}" ><i class="fa fa-github"></i> Source Code</a>
+						<a class="btn btn-lg aah-button" href="http://godoc.org/{{.Repo.GopkgPath}}" ><i class="fa fa-info-circle"></i> API Documentation</a>
 					</div>
 				</div>
 				<div class="row main" >
