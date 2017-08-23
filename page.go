@@ -128,7 +128,7 @@ const packageTemplateString = `<!DOCTYPE html>
 						<div class="page-header">
 							<h1>{{.Repo.GopkgPath}}</h1>
 							{{.Synopsis}}
-							<div class="pull-right" style="margin-top:-50px;">
+							<div class="pull-right" style="margin-top:-65px;">
 								<a href="https://aahframework.org"><img src="https://aahframework.org/assets/img/aah-logo-64x64.png" alt="aah framework logo"/></a>
 							</div>
 						</div>
