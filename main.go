@@ -281,8 +281,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if repo.SubPath == "/git-upload-pack" {
-		resp.Header().Set("Location", "https://"+repo.GitHubRoot()+"/git-upload-pack")
-		resp.WriteHeader(http.StatusMovedPermanently)
+		proxyGitUploadPack(resp, req, "https://"+repo.GitHubRoot()+"/git-upload-pack")
 		return
 	}
 
