@@ -43,7 +43,7 @@ const packageTemplateString = `<!DOCTYPE html>
 				font-family: 'Ubuntu Mono', sans-serif;
 			}
 
-			.aah-button {
+			.aah-button, .aah-button:hover {
 				color: #fff;
 				background-color: #e25657;
 				border-color: #e25657;
@@ -118,7 +118,7 @@ const packageTemplateString = `<!DOCTYPE html>
 		<script type="text/javascript">
 			// If there's a URL fragment, assume it's an attempt to read a specific documentation entry.
 			if (window.location.hash.length > 1) {
-				window.location = "http://godoc.org/{{.Repo.GopkgPath}}" + window.location.hash;
+				window.location = "https://godoc.org/{{.Repo.GopkgPath}}" + window.location.hash;
 			}
 		</script>
 		<div id="wrap" >
@@ -142,7 +142,7 @@ const packageTemplateString = `<!DOCTYPE html>
 				<div class="row" >
 					<div class="col-sm-12" >
 						<a class="btn btn-lg aah-button" href="https://{{.Repo.GitHubRoot}}/tree/{{.Repo.GitHubTree}}{{.Repo.SubPath}}" ><i class="fa fa-github"></i> Source Code</a>
-						<a class="btn btn-lg aah-button" href="http://godoc.org/{{.Repo.GopkgPath}}" ><i class="fa fa-info-circle"></i> API Documentation</a>
+						<a class="btn btn-lg aah-button" href="https://godoc.org/{{.Repo.GopkgPath}}" ><i class="fa fa-info-circle"></i> API Documentation</a>
 					</div>
 				</div>
 				<div class="row main" >
