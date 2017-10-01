@@ -28,10 +28,7 @@ var (
 	domainNameFlag = flag.String("domainName", "http://labix.org/gopkg.in", "Provide custom domain name")
 )
 
-var httpServer = &http.Server{
-	ReadTimeout:  20 * time.Second,
-	WriteTimeout: 20 * time.Second,
-}
+var httpServer *http.Server
 
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
@@ -72,15 +69,21 @@ func run() error {
 	}
 
 	if *httpFlag != "" {
-		server := *httpServer
-		server.Addr = *httpFlag
+		httpServer = &http.Server{
+			ReadTimeout:  20 * time.Second,
+			WriteTimeout: 20 * time.Second,
+		}
+		httpServer.Addr = *httpFlag
 		go func() {
-			ch <- server.ListenAndServe()
+			ch <- httpServer.ListenAndServe()
 		}()
 	}
 	if *httpsFlag != "" {
-		server := *httpServer
-		server.Addr = *httpsFlag
+		httpServer = &http.Server{
+			ReadTimeout:  20 * time.Second,
+			WriteTimeout: 20 * time.Second,
+		}
+		httpServer.Addr = *httpsFlag
 		if *acmeFlag != "" {
 			m := autocert.Manager{
 				Prompt:      autocert.AcceptTOS,
@@ -96,12 +99,12 @@ func run() error {
 				),
 				Email: "gustavo@niemeyer.net",
 			}
-			server.TLSConfig = &tls.Config{
+			httpServer.TLSConfig = &tls.Config{
 				GetCertificate: m.GetCertificate,
 			}
 		}
 		go func() {
-			ch <- server.ListenAndServeTLS(*certFlag, *keyFlag)
+			ch <- httpServer.ListenAndServeTLS(*certFlag, *keyFlag)
 		}()
 	}
 	return <-ch
@@ -187,16 +190,14 @@ func (repo *Repo) GopkgVersionRoot(version Version) string {
 	if repo.OldFormat {
 		if repo.User == "" || repo.IsCustomAssigned {
 			return *domainNameFlag + "/" + v + "/" + repo.Name
-		} else {
-			return *domainNameFlag + "/" + repo.User + "/" + v + "/" + repo.Name
 		}
-	} else {
-		if repo.User == "" || repo.IsCustomAssigned {
-			return *domainNameFlag + "/" + repo.Name + "." + v
-		} else {
-			return *domainNameFlag + "/" + repo.User + "/" + repo.Name + "." + v
-		}
+		return *domainNameFlag + "/" + repo.User + "/" + v + "/" + repo.Name
 	}
+
+	if repo.User == "" || repo.IsCustomAssigned {
+		return *domainNameFlag + "/" + repo.Name + "." + v
+	}
+	return *domainNameFlag + "/" + repo.User + "/" + repo.Name + "." + v
 }
 
 var patternOld = regexp.MustCompile(`^/(?:([a-z0-9][-a-z0-9]+)/)?((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2}(?:-unstable)?)/([a-zA-Z][-a-zA-Z0-9]*)(?:\.git)?((?:/[a-zA-Z][-a-zA-Z0-9]*)*)$`)
@@ -204,7 +205,7 @@ var patternNew = regexp.MustCompile(`^/(?:([a-zA-Z0-9][-a-zA-Z0-9]+)/)?([a-zA-Z]
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	if req.URL.Path == "/health-check" {
-		resp.Write([]byte("ok"))
+		_, _ = resp.Write([]byte("ok"))
 		return
 	}
 
@@ -276,7 +277,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		return
 	default:
 		resp.WriteHeader(http.StatusBadGateway)
-		resp.Write([]byte(fmt.Sprintf("Cannot obtain refs from GitHub: %v", err)))
+		fmt.Fprintf(resp, "Cannot obtain refs from GitHub: %v", err)
 		return
 	}
 
@@ -287,7 +288,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 	if repo.SubPath == "/info/refs" {
 		resp.Header().Set("Content-Type", "application/x-git-upload-pack-advertisement")
-		resp.Write(changed)
+		_, _ = resp.Write(changed)
 		return
 	}
 
@@ -309,7 +310,7 @@ func sendNotFound(resp http.ResponseWriter, msg string, args ...interface{}) {
 		msg = fmt.Sprintf(msg, args...)
 	}
 	resp.WriteHeader(http.StatusNotFound)
-	resp.Write([]byte(msg))
+	fmt.Fprint(resp, msg)
 }
 
 const refsSuffix = ".git/info/refs?service=git-upload-pack"

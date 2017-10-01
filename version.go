@@ -84,7 +84,7 @@ func parseVersion(s string) (v Version, ok bool) {
 		return
 	}
 	vout := InvalidVersion
-	unstable := false
+	var unstable bool
 	i := 1
 	for _, vptr := range []*int{&vout.Major, &vout.Minor, &vout.Patch} {
 		*vptr, unstable, i = parseVersionPart(s, i)
@@ -131,7 +131,7 @@ func parseVersionPart(s string, i int) (part int, unstable bool, newi int) {
 			}
 		}
 	}
-	panic("unreachable")
+	// panic("unreachable")
 }
 
 // VersionList implements sort.Interface
