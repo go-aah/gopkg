@@ -5,7 +5,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -72,7 +71,7 @@ func proxyGitUploadPack(w http.ResponseWriter, r *http.Request, target string) {
 		}
 	}
 
-	_, _ = copyResponse(w, res.Body)
+	_, _ = io.Copy(w, res.Body)
 	_ = res.Body.Close()
 
 	if len(res.Trailer) == announcedTrailers {
@@ -124,32 +123,6 @@ func cleanHopHeaders(h http.Header) {
 	for _, hh := range hopHeaders {
 		if h.Get(hh) != "" {
 			h.Del(hh)
-		}
-	}
-}
-
-func copyResponse(dst io.Writer, src io.Reader) (int64, error) {
-	buf := make([]byte, 32*1024)
-	var written int64
-	for {
-		nr, rerr := src.Read(buf)
-		if rerr != nil && rerr != io.EOF && rerr != context.Canceled {
-			fmt.Printf("github proxy error during body copy: %v\n", rerr)
-		}
-		if nr > 0 {
-			nw, werr := dst.Write(buf[:nr])
-			if nw > 0 {
-				written += int64(nw)
-			}
-			if werr != nil {
-				return written, werr
-			}
-			if nr != nw {
-				return written, io.ErrShortWrite
-			}
-		}
-		if rerr != nil {
-			return written, rerr
 		}
 	}
 }
