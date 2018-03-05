@@ -33,15 +33,15 @@ var versionParseTests = []struct {
 	{-1, -1, -1, false, "v1.2.3."},
 
 	{0, -1, -1, false, "v0"},
-	{0, -1, -1, true, "v0-unstable"},
+	{0, -1, -1, true, "v0-edge"},
 	{1, -1, -1, false, "v1"},
-	{1, -1, -1, true, "v1-unstable"},
+	{1, -1, -1, true, "v1-edge"},
 	{1, 2, -1, false, "v1.2"},
-	{1, 2, -1, true, "v1.2-unstable"},
+	{1, 2, -1, true, "v1.2-edge"},
 	{1, 2, 3, false, "v1.2.3"},
-	{1, 2, 3, true, "v1.2.3-unstable"},
+	{1, 2, 3, true, "v1.2.3-edge"},
 	{12, 34, 56, false, "v12.34.56"},
-	{12, 34, 56, true, "v12.34.56-unstable"},
+	{12, 34, 56, true, "v12.34.56-edge"},
 }
 
 func (s *VersionSuite) TestParse(c *C) {
@@ -65,9 +65,9 @@ func (s *VersionSuite) TestParse(c *C) {
 
 var versionLessTests = []struct {
 	oneMajor, oneMinor, onePatch int
-	oneUnstable                  bool
+	oneEdge                      bool
 	twoMajor, twoMinor, twoPatch int
-	twoUnstable, less            bool
+	twoEdge, less                bool
 }{
 	{0, 0, 0, false, 0, 0, 0, false, false},
 	{1, 0, 0, false, 1, 0, 0, false, false},
@@ -86,8 +86,8 @@ var versionLessTests = []struct {
 
 func (s *VersionSuite) TestLess(c *C) {
 	for _, t := range versionLessTests {
-		one := Version{t.oneMajor, t.oneMinor, t.onePatch, t.oneUnstable}
-		two := Version{t.twoMajor, t.twoMinor, t.twoPatch, t.twoUnstable}
+		one := Version{t.oneMajor, t.oneMinor, t.onePatch, t.oneEdge}
+		two := Version{t.twoMajor, t.twoMinor, t.twoPatch, t.twoEdge}
 		if one.Less(two) != t.less {
 			c.Fatalf("version %s < %s returned %v", one, two, !t.less)
 		}
@@ -96,9 +96,9 @@ func (s *VersionSuite) TestLess(c *C) {
 
 var versionContainsTests = []struct {
 	oneMajor, oneMinor, onePatch int
-	oneUnstable                  bool
+	oneEdge                      bool
 	twoMajor, twoMinor, twoPatch int
-	twoUnstable, contains        bool
+	twoEdge, contains            bool
 }{
 	{12, 34, 56, false, 12, 34, 56, false, true},
 	{12, 34, 56, false, 12, 34, 78, false, false},
@@ -113,8 +113,8 @@ var versionContainsTests = []struct {
 
 func (s *VersionSuite) TestContains(c *C) {
 	for _, t := range versionContainsTests {
-		one := Version{t.oneMajor, t.oneMinor, t.onePatch, t.oneUnstable}
-		two := Version{t.twoMajor, t.twoMinor, t.twoPatch, t.twoUnstable}
+		one := Version{t.oneMajor, t.oneMinor, t.onePatch, t.oneEdge}
+		two := Version{t.twoMajor, t.twoMinor, t.twoPatch, t.twoEdge}
 		if one.Contains(two) != t.contains {
 			c.Fatalf("version %s.Contains(%s) returned %v", one, two, !t.contains)
 		}

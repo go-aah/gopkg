@@ -134,9 +134,9 @@ const packageTemplateString = `<!DOCTYPE html>
 						</div>
 					</div>
 				</div>
-				{{ if .Repo.MajorVersion.Unstable }}
+				{{ if .Repo.MajorVersion.Edge }}
 					<div class="col-sm-12 alert alert-danger">
-						This is an <b><i>unstable</i></b> package and should <i>not</i> be used in released code.
+						This is an <b><i>edge</i></b> package and should <i>not</i> be used in released code.
 					</div>
 				{{ end }}
 				<div class="row" >
@@ -168,7 +168,7 @@ const packageTemplateString = `<!DOCTYPE html>
 						{{ if .LatestVersions }}
 							{{ range .LatestVersions }}
 								<div>
-									<a href="//{{gopkgVersionRoot $.Repo .}}{{$.Repo.SubPath}}" {{if eq .Major $.Repo.MajorVersion.Major}}{{if eq .Unstable $.Repo.MajorVersion.Unstable}}class="current"{{end}}{{end}}>v{{.Major}}{{if .Unstable}}-unstable{{end}}</a>
+									<a href="//{{gopkgVersionRoot $.Repo .}}{{$.Repo.SubPath}}" {{if eq .Major $.Repo.MajorVersion.Major}}{{if eq .Edge $.Repo.MajorVersion.Edge}}class="current"{{end}}{{end}}>v{{.Major}}{{if .Edge}}-edge{{end}}</a>
 									&rarr;
 									<span class="label label-default">{{.}}</span>
 								</div>
@@ -242,10 +242,10 @@ func renderPackagePage(resp http.ResponseWriter, req *http.Request, repo *Repo) 
 		Repo: repo,
 	}
 
-	// Calculate the latest version for each major version, both stable and unstable.
+	// Calculate the latest version for each major version, both stable and edge.
 	latestVersions := make(map[int]Version)
 	for _, v := range repo.AllVersions {
-		if v.Unstable {
+		if v.Edge {
 			continue
 		}
 		v2, exists := latestVersions[v.Major]
@@ -259,7 +259,7 @@ func renderPackagePage(resp http.ResponseWriter, req *http.Request, repo *Repo) 
 	}
 	sort.Sort(sort.Reverse(data.LatestVersions))
 
-	if repo.FullVersion.Unstable {
+	if repo.FullVersion.Edge {
 		// Prepend post-sorting so it shows first.
 		data.LatestVersions = append([]Version{repo.FullVersion}, data.LatestVersions...)
 	}

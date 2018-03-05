@@ -146,7 +146,7 @@ type Repo struct {
 func (repo *Repo) SetVersions(all []Version) {
 	repo.AllVersions = all
 	for _, v := range repo.AllVersions {
-		if v.Major == repo.MajorVersion.Major && v.Unstable == repo.MajorVersion.Unstable && repo.FullVersion.Less(v) {
+		if v.Major == repo.MajorVersion.Major && v.Edge == repo.MajorVersion.Edge && repo.FullVersion.Less(v) {
 			repo.FullVersion = v
 		}
 	}
@@ -200,8 +200,8 @@ func (repo *Repo) GopkgVersionRoot(version Version) string {
 	return *domainNameFlag + "/" + repo.User + "/" + repo.Name + "." + v
 }
 
-var patternOld = regexp.MustCompile(`^/(?:([a-z0-9][-a-z0-9]+)/)?((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2}(?:-unstable)?)/([a-zA-Z][-a-zA-Z0-9]*)(?:\.git)?((?:/[a-zA-Z][-a-zA-Z0-9]*)*)$`)
-var patternNew = regexp.MustCompile(`^/(?:([a-zA-Z0-9][-a-zA-Z0-9]+)/)?([a-zA-Z][-.a-zA-Z0-9]*)\.((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2}(?:-unstable)?)(?:\.git)?((?:/[a-zA-Z0-9][-.a-zA-Z0-9]*)*)$`)
+var patternOld = regexp.MustCompile(`^/(?:([a-z0-9][-a-z0-9]+)/)?((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2}(?:-edge)?)/([a-zA-Z][-a-zA-Z0-9]*)(?:\.git)?((?:/[a-zA-Z][-a-zA-Z0-9]*)*)$`)
+var patternNew = regexp.MustCompile(`^/(?:([a-zA-Z0-9][-a-zA-Z0-9]+)/)?([a-zA-Z][-.a-zA-Z0-9]*)\.((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2}(?:-edge)?)(?:\.git)?((?:/[a-zA-Z0-9][-.a-zA-Z0-9]*)*)$`)
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	if req.URL.Path == "/health-check" {
@@ -268,9 +268,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	case ErrNoVersion:
 		major := repo.MajorVersion
 		suffix := ""
-		if major.Unstable {
-			major.Unstable = false
-			suffix = unstableSuffix
+		if major.Edge {
+			major.Edge = false
+			suffix = edgeSuffix
 		}
 		v := major.String()
 		sendNotFound(resp, `GitHub repository at https://%s has no branch or tag "%s%s", "%s.N%s" or "%s.N.M%s"`, repo.GitHubRoot(), v, suffix, v, suffix, v, suffix)

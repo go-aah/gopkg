@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	. "gopkg.in/check.v1"
 	"sort"
+
+	. "gopkg.in/check.v1"
 )
 
 var _ = Suite(&RefsSuite{})
@@ -136,27 +137,27 @@ var refsTests = []refsTest{{
 	),
 	[]string{"v1", "v1", "v2"},
 }, {
-	"Matching unstable versions",
+	"Matching edge versions",
 	reflines(
 		"00000000000000000000000000000000000hash1 HEAD",
 		"00000000000000000000000000000000000hash2 refs/heads/master",
 		"00000000000000000000000000000000000hash3 refs/heads/v1",
-		"00000000000000000000000000000000000hash4 refs/heads/v1.1-unstable",
-		"00000000000000000000000000000000000hash5 refs/heads/v1.3-unstable",
-		"00000000000000000000000000000000000hash6 refs/heads/v1.2-unstable",
+		"00000000000000000000000000000000000hash4 refs/heads/v1.1-edge",
+		"00000000000000000000000000000000000hash5 refs/heads/v1.3-edge",
+		"00000000000000000000000000000000000hash6 refs/heads/v1.2-edge",
 		"00000000000000000000000000000000000hash7 refs/heads/v2",
 	),
-	"v1-unstable",
+	"v1-edge",
 	reflines(
-		"00000000000000000000000000000000000hash5 HEAD\x00symref=HEAD:refs/heads/v1.3-unstable",
+		"00000000000000000000000000000000000hash5 HEAD\x00symref=HEAD:refs/heads/v1.3-edge",
 		"00000000000000000000000000000000000hash5 refs/heads/master",
 		"00000000000000000000000000000000000hash3 refs/heads/v1",
-		"00000000000000000000000000000000000hash4 refs/heads/v1.1-unstable",
-		"00000000000000000000000000000000000hash5 refs/heads/v1.3-unstable",
-		"00000000000000000000000000000000000hash6 refs/heads/v1.2-unstable",
+		"00000000000000000000000000000000000hash4 refs/heads/v1.1-edge",
+		"00000000000000000000000000000000000hash5 refs/heads/v1.3-edge",
+		"00000000000000000000000000000000000hash6 refs/heads/v1.2-edge",
 		"00000000000000000000000000000000000hash7 refs/heads/v2",
 	),
-	[]string{"v1", "v1.1-unstable", "v1.2-unstable", "v1.3-unstable", "v2"},
+	[]string{"v1", "v1.1-edge", "v1.2-edge", "v1.3-edge", "v2"},
 }}
 
 func reflines(lines ...string) string {

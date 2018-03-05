@@ -7,21 +7,21 @@ import (
 // Version represents a version number.
 // An element that is not present is represented as -1.
 type Version struct {
-	Major    int
-	Minor    int
-	Patch    int
-	Unstable bool
+	Major int
+	Minor int
+	Patch int
+	Edge  bool
 }
 
-const unstableSuffix = "-unstable"
+const edgeSuffix = "-edge"
 
 func (v Version) String() string {
 	if v.Major < 0 {
 		panic(fmt.Sprintf("cannot stringify invalid version (major is %d)", v.Major))
 	}
 	suffix := ""
-	if v.Unstable {
-		suffix = unstableSuffix
+	if v.Edge {
+		suffix = edgeSuffix
 	}
 	if v.Minor < 0 {
 		return fmt.Sprintf("v%d%s", v.Major, suffix)
@@ -43,7 +43,7 @@ func (v Version) Less(other Version) bool {
 	if v.Patch != other.Patch {
 		return v.Patch < other.Patch
 	}
-	return v.Unstable && !other.Unstable
+	return v.Edge && !other.Edge
 }
 
 // Contains returns whether version v contains version other.
@@ -53,10 +53,10 @@ func (v Version) Less(other Version) bool {
 // For example, Version{1, 1, -1} contains both Version{1, 1, -1} and Version{1, 1, 2},
 // but not Version{1, -1, -1} or Version{1, 2, -1}.
 //
-// Unstable versions (-unstable) only contain unstable versions, and stable
+// Edge versions (-edge) only contain edge versions, and stable
 // versions only contain stable versions.
 func (v Version) Contains(other Version) bool {
-	if v.Unstable != other.Unstable {
+	if v.Edge != other.Edge {
 		return false
 	}
 	if v.Patch != -1 {
@@ -84,22 +84,22 @@ func parseVersion(s string) (v Version, ok bool) {
 		return
 	}
 	vout := InvalidVersion
-	var unstable bool
+	var edge bool
 	i := 1
 	for _, vptr := range []*int{&vout.Major, &vout.Minor, &vout.Patch} {
-		*vptr, unstable, i = parseVersionPart(s, i)
+		*vptr, edge, i = parseVersionPart(s, i)
 		if i < 0 {
 			return
 		}
 		if i == len(s) {
-			vout.Unstable = unstable
+			vout.Edge = edge
 			return vout, true
 		}
 	}
 	return
 }
 
-func parseVersionPart(s string, i int) (part int, unstable bool, newi int) {
+func parseVersionPart(s string, i int) (part int, edge bool, newi int) {
 	j := i
 	for j < len(s) && s[j] != '.' && s[j] != '-' {
 		j++
@@ -126,8 +126,8 @@ func parseVersionPart(s string, i int) (part int, unstable bool, newi int) {
 			if c == '.' {
 				return part, false, i + 1
 			}
-			if c == '-' && s[i:] == unstableSuffix {
-				return part, true, i + len(unstableSuffix)
+			if c == '-' && s[i:] == edgeSuffix {
+				return part, true, i + len(edgeSuffix)
 			}
 		}
 	}
