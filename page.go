@@ -45,8 +45,8 @@ const packageTemplateString = `<!DOCTYPE html>
 
 			.aah-button, .aah-button:hover {
 				color: #fff;
-				background-color: #e25657;
-				border-color: #e25657;
+				background-color: #3857ba;
+				border-color: #3857ba;
 			}
 
 			.main {
