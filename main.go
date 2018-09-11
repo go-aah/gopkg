@@ -34,7 +34,34 @@ var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 }
 
+// Version freeze for aah framework in-favor of go modules
+var freezeVersion = map[string]Version{
+	"aah":        Version{Minor: 11, Patch: 4},
+	"tools":      Version{Minor: 12, Patch: 2},
+	"ainsp":      Version{Minor: 2, Patch: 1},
+	"vfs":        Version{Minor: 2},
+	"router":     Version{Minor: 12, Patch: 1},
+	"ws":         Version{Minor: 4},
+	"essentials": Version{Minor: 8},
+	"config":     Version{Minor: 5},
+	"ahttp":      Version{Minor: 11, Patch: 3},
+	"view":       Version{Minor: 9},
+	"security":   Version{Minor: 10, Patch: 1},
+	"i18n":       Version{Minor: 4},
+	"valpar":     Version{Minor: 4},
+	"aruntime":   Version{Minor: 3, Patch: 1},
+	"log":        Version{Minor: 7, Patch: 1},
+	"test":       Version{Minor: 2, Patch: -1},
+	"forge":      Version{Minor: 5, Patch: 1},
+	"pool":       Version{Minor: 2, Patch: -1},
+}
+
 func main() {
+	defer func() {
+		if httpServer != nil {
+			httpServer.Close()
+		}
+	}()
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -217,6 +244,12 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if strings.Contains(req.URL.Path, edgeSuffix) {
+		resp.WriteHeader(http.StatusBadGateway)
+		fmt.Fprintln(resp, "aah has removed support for *-edge versions since v0.12.0 onwards in-favour of go modules support.")
+		return
+	}
+
 	m := patternNew.FindStringSubmatch(req.URL.Path)
 	oldFormat := false
 	if m == nil {
@@ -279,6 +312,10 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(resp, "Cannot obtain refs from GitHub: %v", err)
 		return
+	}
+
+	if v, found := freezeVersion[repo.Name]; found {
+		repo.FullVersion = v
 	}
 
 	if repo.SubPath == "/git-upload-pack" {
