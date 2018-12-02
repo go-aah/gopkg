@@ -46,6 +46,20 @@ func (v Version) Less(other Version) bool {
 	return v.Edge && !other.Edge
 }
 
+// Greater returns whether v is greater than other.
+func (v Version) Greater(other Version) bool {
+	if v.Major != other.Major {
+		return v.Major > other.Major
+	}
+	if v.Minor != other.Minor {
+		return v.Minor > other.Minor
+	}
+	if v.Patch != other.Patch {
+		return v.Patch > other.Patch
+	}
+	return v.Edge && !other.Edge
+}
+
 // Contains returns whether version v contains version other.
 // Version v is defined to contain version other when they both have the same Major
 // version and v.Minor and v.Patch are either undefined or are equal to other's.

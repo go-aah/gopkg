@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	httpFlag       = flag.String("http", ":8080", "Serve HTTP at given address")
+	httpFlag       = flag.String("http", "", "Serve HTTP at given address")
 	httpsFlag      = flag.String("https", "", "Serve HTTPS at given address")
 	certFlag       = flag.String("cert", "", "Use the provided TLS certificate")
 	keyFlag        = flag.String("key", "", "Use the provided TLS key")
@@ -288,7 +288,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	var versions VersionList
 	original, err := fetchRefs(repo)
 	if err == nil {
-		changed, versions, err = changeRefs(original, repo.MajorVersion)
+		changed, versions, err = changeRefs(original, repo.MajorVersion, freezeVersion[repo.Name])
 		repo.SetVersions(versions)
 	}
 
@@ -312,10 +312,6 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(resp, "Cannot obtain refs from GitHub: %v", err)
 		return
-	}
-
-	if v, found := freezeVersion[repo.Name]; found {
-		repo.FullVersion = v
 	}
 
 	if repo.SubPath == "/git-upload-pack" {
@@ -378,7 +374,7 @@ func fetchRefs(repo *Repo) (data []byte, err error) {
 	return data, err
 }
 
-func changeRefs(data []byte, major Version) (changed []byte, versions VersionList, err error) {
+func changeRefs(data []byte, major Version, freezeVersion Version) (changed []byte, versions VersionList, err error) {
 	var hlinei, hlinej int // HEAD reference line start/end
 	var mlinei, mlinej int // master reference line start/end
 	var vrefhash string
@@ -437,6 +433,9 @@ func changeRefs(data []byte, major Version) (changed []byte, versions VersionLis
 				name = name[:len(name)-3]
 			}
 			v, ok := parseVersion(name[strings.IndexByte(name, 'v'):])
+			if ok && v.Greater(freezeVersion) {
+				continue
+			}
 			if ok && major.Contains(v) && (v == vrefv || !vrefv.IsValid() || vrefv.Less(v)) {
 				vrefv = v
 				vrefhash = sdata[hashi:hashj]
@@ -498,6 +497,7 @@ func changeRefs(data []byte, major Version) (changed []byte, versions VersionLis
 	} else {
 		buf.Write(data[hlinej:])
 	}
+	log.Printf("Changed ref: %s %s", vrefhash, vrefname)
 
 	return buf.Bytes(), versions, nil
 }
